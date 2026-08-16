@@ -1,0 +1,31 @@
+name: Error reproducible
+description: Comunica un error sin incluir datos ni credenciales SAP reales.
+title: "[Bug] "
+labels: [bug]
+body:
+  - type: input
+    id: version
+    attributes:
+      label: Versión
+    validations:
+      required: true
+  - type: dropdown
+    id: environment
+    attributes:
+      label: Entorno
+      options: [Simulador, SAP sandbox, SAP producción]
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproducción mínima anonimizada
+    validations:
+      required: true
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Seguridad
+      options:
+        - label: He eliminado secretos, URLs privadas y datos empresariales.
+          required: true

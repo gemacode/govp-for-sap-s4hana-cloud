@@ -1,0 +1,27 @@
+{
+  "name": "@gemacode/govp-for-sap-s4hana-cloud",
+  "version": "0.1.0",
+  "description": "Open source side-by-side connector between SAP S/4HANA Cloud Public Edition and GOVP Exchange.",
+  "type": "module",
+  "license": "Apache-2.0",
+  "repository": { "type": "git", "url": "git+https://github.com/gemacode/govp-for-sap-s4hana-cloud.git" },
+  "homepage": "https://github.com/gemacode/govp-for-sap-s4hana-cloud#readme",
+  "engines": { "node": ">=20" },
+  "exports": { ".": { "types": "./dist/index.d.ts", "default": "./dist/index.js" } },
+  "files": ["dist", "README.md", "LICENSE"],
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "vitest run",
+    "check": "npm run typecheck && npm test && npm run build",
+    "prepack": "npm run check"
+  },
+  "dependencies": {
+    "@gemacode/govp-connector-kit": "https://github.com/gemacode/govp-connector-kit/releases/download/v0.1.1/gemacode-govp-connector-kit-0.1.1.tgz"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "typescript": "~5.9.3",
+    "vitest": "^4.1.0"
+  }
+}
