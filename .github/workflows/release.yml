@@ -16,6 +16,6 @@ jobs:
       - run: npm ci
       - run: npm run check
       - run: npm pack
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: gemacode-govp-for-sap-s4hana-cloud-*.tgz
