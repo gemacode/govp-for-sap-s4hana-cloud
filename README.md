@@ -5,7 +5,7 @@ GOVP Exchange. Consume entregas mediante las APIs publicadas de SAP, emite un
 GOVP al contabilizar la salida de mercancías y permite comprobarlo desde una
 entrega entrante.
 
-> Estado: candidato técnico `0.1.0`. El simulador abierto valida el contrato y
+> Estado: candidato técnico `0.1.1`. El simulador abierto valida el contrato y
 > los fallos operativos, pero no sustituye la aceptación en un tenant SAP real.
 
 ## Alcance del candidato
@@ -14,6 +14,7 @@ entrega entrante.
 - API oficial `Inbound Delivery (A2X)` para el flujo receptor;
 - modo `observe` que no emite ni modifica SAP;
 - modo `issue` con idempotencia estable por sistema y entrega;
+- vigencia determinista basada en la fecha real de movimiento de mercancías;
 - huella SHA-256 de datos logísticos mínimos, sin copiar la entrega completa;
 - campos de extensibilidad opcionales para código, estado y URL GOVP;
 - token CSRF y `ETag` al actualizar SAP;

@@ -56,6 +56,17 @@ function eventTime(value: string) {
   return parsed;
 }
 
+export function deliveryValidUntil(delivery: SapOutboundDelivery, validityDays: number) {
+  if (!delivery.ActualGoodsMovementDate) {
+    throw new TypeError('ActualGoodsMovementDate es obligatorio para emitir un GOVP determinista.');
+  }
+  const movementAt = /^\d{4}-\d{2}-\d{2}$/.test(delivery.ActualGoodsMovementDate)
+    ? Date.parse(`${delivery.ActualGoodsMovementDate}T00:00:00.000Z`)
+    : Date.parse(delivery.ActualGoodsMovementDate);
+  if (!Number.isFinite(movementAt)) throw new TypeError('ActualGoodsMovementDate debe ser una fecha ISO válida.');
+  return new Date(movementAt + validityDays * 86_400_000).toISOString();
+}
+
 export class SapS4HanaGovpConnector {
   private readonly config: Required<Pick<SapConnectorConfig, 'mode' | 'systemId' | 'issuerName'>> & SapConnectorConfig;
 
@@ -75,6 +86,9 @@ export class SapS4HanaGovpConnector {
       govpVerifyUrlField: validFieldName(config.govpVerifyUrlField),
     };
     if (!this.config.systemId || !this.config.issuerName) throw new TypeError('systemId e issuerName son obligatorios.');
+    if (!Number.isInteger(this.config.validityDays ?? 365) || (this.config.validityDays ?? 365) < 1) {
+      throw new TypeError('validityDays debe ser un entero positivo.');
+    }
   }
 
   async handleOutboundEvent(event: SapBusinessEvent): Promise<EventResult> {
@@ -97,7 +111,7 @@ export class SapS4HanaGovpConnector {
     }
 
     const systemHash = createHash('sha256').update(this.config.systemId).digest('hex').slice(0, 16);
-    const validUntil = new Date(Date.now() + (this.config.validityDays ?? 365) * 86_400_000).toISOString();
+    const validUntil = deliveryValidUntil(delivery, this.config.validityDays ?? 365);
     const result = await this.exchange.issue({
       issuer: { name: this.config.issuerName },
       subject: {

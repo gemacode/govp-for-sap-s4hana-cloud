@@ -1,6 +1,6 @@
 {
   "name": "@gemacode/govp-for-sap-s4hana-cloud",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Open source side-by-side connector between SAP S/4HANA Cloud Public Edition and GOVP Exchange.",
   "type": "module",
   "license": "Apache-2.0",

@@ -6,6 +6,7 @@ import {
   SapApiClient,
   SapS4HanaGovpConnector,
   createSapS4Simulator,
+  deliveryValidUntil,
   deliveryEvidenceSha256,
   oauthClientCredentials,
   type SapBusinessEvent,
@@ -44,7 +45,7 @@ describe('GOVP for SAP S/4HANA Cloud', () => {
     exchangeSimulator = createExchangeSimulator();
   });
 
-  async function connector(mode: 'observe' | 'issue' = 'issue', fields = true) {
+  async function connector(mode: 'observe' | 'issue' = 'issue', fields = true, validityDays?: number) {
     const registration = await registerConnector('http://localhost', { platform: 'sap_s4hana_cloud', label: 'SAP CI', siteUrl: 'https://example.invalid' }, exchangeSimulator.fetch);
     const exchange = new GovpExchangeClient({ baseUrl: 'http://localhost', token: registration.apiToken, fetch: exchangeSimulator.fetch, retryBaseMs: 0 });
     const sap = new SapApiClient({ baseUrl: 'http://localhost', auth: async () => ({ Authorization: 'Bearer sim' }), fetch: sapSimulator.fetch, retryBaseMs: 0 });
@@ -53,6 +54,7 @@ describe('GOVP for SAP S/4HANA Cloud', () => {
       mode,
       systemId: 'SAP-CI-1',
       issuerName: 'Empresa SAP ficticia',
+      validityDays,
       ...(fields ? { govpCodeField: 'YY1_GOVPCode_DLH', govpStatusField: 'YY1_GOVPStatus_DLH', govpVerifyUrlField: 'YY1_GOVPVerifyURL_DLH' } : {}),
     }, sap, exchange, store);
     return { instance, store, exchange };
@@ -87,6 +89,15 @@ describe('GOVP for SAP S/4HANA Cloud', () => {
     });
     await expect(instance.handleOutboundEvent(event())).resolves.toMatchObject({ outcome: 'duplicate', code: first.code });
     await expect(exchange.verify(first.code!)).resolves.toMatchObject({ verification: { status: 'valid', reasonCode: 'GOVP_VALID' } });
+  });
+
+  it('mantiene idéntica la vigencia aunque el reintento suceda en otro momento', () => {
+    expect(deliveryValidUntil(outbound(), 30)).toBe('2026-09-15T00:00:00.000Z');
+    expect(deliveryValidUntil(structuredClone(outbound()), 30)).toBe(deliveryValidUntil(outbound(), 30));
+  });
+
+  it('rechaza periodos de vigencia inválidos antes de operar', async () => {
+    await expect(connector('issue', true, 0)).rejects.toThrow('validityDays');
   });
 
   it('no emite antes de contabilizar la salida de mercancías', async () => {
